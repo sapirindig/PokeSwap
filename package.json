@@ -1,0 +1,20 @@
+{
+  "name": "pokeswap",
+  "version": "1.0.0",
+  "description": "PokeSwap is a digital platform for showcasing, trading, and collecting Pokémon cards between users.",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sapir Indig",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
