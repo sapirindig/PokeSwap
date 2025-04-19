@@ -8,34 +8,43 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const Post = require("../models/posts_model").default;
-exports.getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deletePost = exports.createPost = exports.getPostById = exports.getAllPosts = void 0;
+const posts_model_1 = __importDefault(require("../models/posts_model"));
+const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { owner } = req.query;
         const filter = owner ? { owner } : {};
-        const posts = yield Post.find(filter);
+        const posts = yield posts_model_1.default.find(filter);
         res.json(posts);
     }
     catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
-exports.getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getAllPosts = getAllPosts;
+const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const post = yield Post.findById(req.params.id);
-        if (!post)
-            return res.status(404).json({ message: "Post not found" });
+        const post = yield posts_model_1.default.findById(req.params.id);
+        if (!post) {
+            res.status(404).json({ message: "Post not found" });
+            return;
+        }
         res.json(post);
     }
     catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
-exports.createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getPostById = getPostById;
+const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("POST request received at /posts");
     console.log("Body:", req.body);
     try {
-        const newPost = yield Post.create(req.body);
+        const newPost = yield posts_model_1.default.create(req.body);
         res.status(201).json(newPost);
     }
     catch (err) {
@@ -43,14 +52,18 @@ exports.createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(400).json({ message: err.message });
     }
 });
-exports.deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.createPost = createPost;
+const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const deleted = yield Post.findByIdAndDelete(req.params.id);
-        if (!deleted)
-            return res.status(404).json({ message: "Post not found" });
+        const deleted = yield posts_model_1.default.findByIdAndDelete(req.params.id);
+        if (!deleted) {
+            res.status(404).json({ message: "Post not found" });
+            return;
+        }
         res.json({ message: "Post deleted" });
     }
     catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
+exports.deletePost = deletePost;

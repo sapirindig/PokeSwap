@@ -37,7 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const mongoose_2 = __importDefault(require("mongoose"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 const body_parser_1 = __importDefault(require("body-parser"));
@@ -46,7 +46,7 @@ dotenv.config();
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
-mongoose_2.default.connect(process.env.DB_CONNECTION)
+mongoose_1.default.connect(process.env.DB_CONNECTION)
     .then(() => console.log("Connected to Database"))
     .catch((err) => console.error("MongoDB connection error:", err));
 app.use('/posts', posts_routes_1.default);
