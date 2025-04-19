@@ -1,12 +1,27 @@
 const express = require('express');
-const app = express();
+const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
+const app = express();
 const port = process.env.PORT;
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+mongoose.connect(process.env.DB_CONNECTION)
+  .then(() => console.log(" Connected to Database"))
+  .catch((err) => console.error(" MongoDB connection error:", err));
+
+
+const postRoutes = require('./routes/posts_routes');
+app.use('/posts', postRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!@@@@@@@@@');
 });
 
-app.listen(port, () => {    
-  console.log(`Example app listening at http://localhost:${port}`);
-}); 
+app.listen(port, () => {
+  console.log(` Server running at http://localhost:${port}`);
+});

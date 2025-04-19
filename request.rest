@@ -1,2 +1,28 @@
 ###
-GET http://localhost:3000
+
+GET http://localhost:3000/posts
+
+###
+
+GET http://localhost:3000/posts?owner=sapir
+
+###
+GET http://localhost:3000/posts/68036b6fa24839a1612b3ed8
+
+
+###
+POST http://localhost:3000/posts
+Content-Type: application/json
+
+{
+  "title": "First from REST",
+  "content": "It finally works",
+  "owner": "sapir"
+}
+
+
+###
+DELETE http://localhost:3000/posts/68036b6fa24839a1612b3ed8
+
+
+
