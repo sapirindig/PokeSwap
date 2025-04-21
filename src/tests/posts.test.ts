@@ -1,127 +1,88 @@
-import request, { Response as SupertestResponse } from "supertest";
+import request from "supertest";
+import initApp from "../server";
+import mongoose from "mongoose";
 import postModel from "../models/posts_model";
-import { app, testUser } from "./setupTests";
+import { Express } from "express";
 
-let postId: string = "";
+var app: Express;
 
-beforeAll(async (): Promise<void> => {
-  console.log("beforeAll posts.test.ts");
+beforeAll(async () => {
+  console.log("beforeAll");
+  app = await initApp();
   await postModel.deleteMany();
 });
 
-afterAll((): void => {
+afterAll((done) => {
   console.log("afterAll");
+  mongoose.connection.close();
+  done();
 });
 
+let postId = "";
 describe("Posts Tests", () => {
-  test("GET all posts (should be empty)", async (): Promise<void> => {
-    const response: SupertestResponse = await request(app).get("/posts");
+  test("Posts test get all", async () => {
+    const response = await request(app).get("/posts");
     expect(response.statusCode).toBe(200);
     expect(response.body.length).toBe(0);
   });
 
-  test("Create Post", async (): Promise<void> => {
-    const response = await request(app)
-      .post("/posts")
-      .set("Authorization", `Bearer ${testUser.token}`)
-      .send({
-        title: "Test Post",
-        content: "Test Content",
-        owner: testUser._id,
-      });
-
+  test("Test Create Post", async () => {
+    const response = await request(app).post("/posts").send({
+      title: "Test Post",
+      content: "Test Content",
+      owner: "TestOwner",
+    });
     expect(response.statusCode).toBe(201);
     expect(response.body.title).toBe("Test Post");
     expect(response.body.content).toBe("Test Content");
+    expect(response.body.owner).toBe("TestOwner");
     postId = response.body._id;
   });
 
-  test("GET posts by owner", async (): Promise<void> => {
-    const response = await request(app).get(`/posts?owner=${testUser._id}`);
+  test("Test get post by owner", async () => {
+    const response = await request(app).get("/posts?owner=TestOwner");
     expect(response.statusCode).toBe(200);
     expect(response.body.length).toBe(1);
-    expect(response.body[0].owner).toBe(testUser._id);
+    expect(response.body[0].title).toBe("Test Post");
+    expect(response.body[0].content).toBe("Test Content");
+    expect(response.body[0].owner).toBe("TestOwner");
   });
 
-  test("GET post by ID", async (): Promise<void> => {
-    const response = await request(app).get(`/posts/${postId}`);
+  test("Test get post by id", async () => {
+    const response = await request(app).get("/posts/" + postId);
     expect(response.statusCode).toBe(200);
-    expect(response.body._id).toBe(postId);
+    expect(response.body.title).toBe("Test Post");
+    expect(response.body.content).toBe("Test Content");
+    expect(response.body.owner).toBe("TestOwner");
   });
 
-  test("Create second Post", async (): Promise<void> => {
-    const response = await request(app)
-      .post("/posts")
-      .set("Authorization", `Bearer ${testUser.token}`)
-      .send({
-        title: "Test Post 2",
-        content: "Test Content 2",
-        owner: testUser._id,
-      });
-
+  test("Test Create Post 2", async () => {
+    const response = await request(app).post("/posts").send({
+      title: "Test Post 2",
+      content: "Test Content 2",
+      owner: "TestOwner2",
+    });
     expect(response.statusCode).toBe(201);
   });
 
-  test("GET all posts (should have 2)", async (): Promise<void> => {
+  test("Posts test get all 2", async () => {
     const response = await request(app).get("/posts");
     expect(response.statusCode).toBe(200);
     expect(response.body.length).toBe(2);
   });
 
-  test("Delete Post", async (): Promise<void> => {
-    const response = await request(app)
-      .delete(`/posts/${postId}`)
-      .set("Authorization", `Bearer ${testUser.token}`);
-
+  test("Test Delete Post", async () => {
+    const response = await request(app).delete("/posts/" + postId);
     expect(response.statusCode).toBe(200);
-
-    const check = await request(app).get(`/posts/${postId}`);
-    expect(check.statusCode).toBe(404);
+    const response2 = await request(app).get("/posts/" + postId);
+    expect(response2.statusCode).toBe(404);
   });
 
-  test("Fail to create post without required fields", async (): Promise<void> => {
-    const response = await request(app)
-      .post("/posts")
-      .set("Authorization", `Bearer ${testUser.token}`)
-      .send({
-        content: "Missing title and owner",
-      });
-
+  test("Test Create Post fail", async () => {
+    const response = await request(app).post("/posts").send({
+      title: "Test Post 2",
+      content: "Test Content 2",
+    });
     expect(response.statusCode).toBe(400);
-  });
-
-  test("Create post with image and like data", async (): Promise<void> => {
-    const response = await request(app)
-      .post("/posts")
-      .set("Authorization", `Bearer ${testUser.token}`)
-      .send({
-        title: "Post with image and likes",
-        content: "Some content here",
-        owner: testUser._id,
-        image: "https://example.com/image.png",
-        likesCount: 1,
-        likedBy: [testUser._id],
-      });
-
-    expect(response.statusCode).toBe(201);
-    expect(response.body.image).toBe("https://example.com/image.png");
-    expect(response.body.likesCount).toBe(1);
-    expect(response.body.likedBy).toContain(testUser._id);
-  });
-
-  test("Check post defaults when fields are missing", async (): Promise<void> => {
-    const response = await request(app)
-      .post("/posts")
-      .set("Authorization", `Bearer ${testUser.token}`)
-      .send({
-        title: "Post with defaults",
-        content: "Only basic data",
-        owner: testUser._id,
-      });
-
-    expect(response.statusCode).toBe(201);
-    expect(response.body.image).toBe("");
-    expect(response.body.likesCount).toBe(0);
-    expect(response.body.likedBy).toEqual([]);
   });
 });

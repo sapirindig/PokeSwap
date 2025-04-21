@@ -22,7 +22,7 @@ Content-Type: application/json
 
 
 ###
-DELETE http://localhost:3000/posts/68036b6fa24839a1612b3ed8
+DELETE http://localhost:3000/posts/6803c390dd4bd8c9a24a0e2e
 
 
 
