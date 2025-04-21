@@ -14,18 +14,6 @@ const postSchema = new mongoose_1.default.Schema({
         type: String,
         required: true,
     },
-    image: {
-        type: String,
-        default: "",
-    },
-    likesCount: {
-        type: Number,
-        default: 0,
-    },
-    likedBy: {
-        type: [String],
-        default: [],
-    },
 });
 const postModel = mongoose_1.default.model("Posts", postSchema);
 exports.default = postModel;

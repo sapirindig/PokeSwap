@@ -13,109 +13,92 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const supertest_1 = __importDefault(require("supertest"));
+const server_1 = __importDefault(require("../server"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const posts_model_1 = __importDefault(require("../models/posts_model"));
-const setupTests_1 = require("./setupTests");
-let postId = "";
+const users_model_1 = __importDefault(require("../models/users_model"));
+var app;
+const testUser = {
+    email: "test@user.com",
+    password: "testpassword",
+};
 beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("beforeAll posts.test.ts");
+    console.log("beforeAll");
+    app = yield (0, server_1.default)();
     yield posts_model_1.default.deleteMany();
+    yield users_model_1.default.deleteMany();
+    yield (0, supertest_1.default)(app).post("/auth/register").send(testUser);
+    const res = yield (0, supertest_1.default)(app).post("/auth/login").send(testUser);
+    testUser.token = res.body.token;
+    testUser._id = res.body._id;
+    expect(testUser.token).toBeDefined();
 }));
-afterAll(() => {
+afterAll((done) => {
     console.log("afterAll");
+    mongoose_1.default.connection.close();
+    done();
 });
+let postId = "";
 describe("Posts Tests", () => {
-    test("GET all posts (should be empty)", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app).get("/posts");
+    test("Posts test get all", () => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield (0, supertest_1.default)(app).get("/posts");
         expect(response.statusCode).toBe(200);
         expect(response.body.length).toBe(0);
     }));
-    test("Create Post", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app)
-            .post("/posts")
-            .set("Authorization", `Bearer ${setupTests_1.testUser.token}`)
+    test("Test Create Post", () => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield (0, supertest_1.default)(app).post("/posts")
+            .set({ authorization: "JWT " + testUser.token })
             .send({
             title: "Test Post",
             content: "Test Content",
-            owner: setupTests_1.testUser._id,
+            owner: "TestOwner",
         });
         expect(response.statusCode).toBe(201);
         expect(response.body.title).toBe("Test Post");
         expect(response.body.content).toBe("Test Content");
         postId = response.body._id;
     }));
-    test("GET posts by owner", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app).get(`/posts?owner=${setupTests_1.testUser._id}`);
+    test("Test get post by owner", () => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield (0, supertest_1.default)(app).get("/posts?owner=" + testUser._id);
         expect(response.statusCode).toBe(200);
         expect(response.body.length).toBe(1);
-        expect(response.body[0].owner).toBe(setupTests_1.testUser._id);
+        expect(response.body[0].title).toBe("Test Post");
+        expect(response.body[0].content).toBe("Test Content");
     }));
-    test("GET post by ID", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app).get(`/posts/${postId}`);
+    test("Test get post by id", () => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield (0, supertest_1.default)(app).get("/posts/" + postId);
         expect(response.statusCode).toBe(200);
-        expect(response.body._id).toBe(postId);
+        expect(response.body.title).toBe("Test Post");
+        expect(response.body.content).toBe("Test Content");
     }));
-    test("Create second Post", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app)
-            .post("/posts")
-            .set("Authorization", `Bearer ${setupTests_1.testUser.token}`)
+    test("Test Create Post 2", () => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield (0, supertest_1.default)(app).post("/posts")
+            .set({ authorization: "JWT " + testUser.token })
             .send({
             title: "Test Post 2",
             content: "Test Content 2",
-            owner: setupTests_1.testUser._id,
+            owner: "TestOwner2",
         });
         expect(response.statusCode).toBe(201);
     }));
-    test("GET all posts (should have 2)", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app).get("/posts");
+    test("Posts test get all 2", () => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield (0, supertest_1.default)(app).get("/posts");
         expect(response.statusCode).toBe(200);
         expect(response.body.length).toBe(2);
     }));
-    test("Delete Post", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app)
-            .delete(`/posts/${postId}`)
-            .set("Authorization", `Bearer ${setupTests_1.testUser.token}`);
+    test("Test Delete Post", () => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield (0, supertest_1.default)(app).delete("/posts/" + postId)
+            .set({ authorization: "JWT " + testUser.token });
         expect(response.statusCode).toBe(200);
-        const check = yield (0, supertest_1.default)(setupTests_1.app).get(`/posts/${postId}`);
-        expect(check.statusCode).toBe(404);
+        const response2 = yield (0, supertest_1.default)(app).get("/posts/" + postId);
+        expect(response2.statusCode).toBe(404);
     }));
-    test("Fail to create post without required fields", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app)
-            .post("/posts")
-            .set("Authorization", `Bearer ${setupTests_1.testUser.token}`)
+    test("Test Create Post fail", () => __awaiter(void 0, void 0, void 0, function* () {
+        const response = yield (0, supertest_1.default)(app).post("/posts")
+            .set({ authorization: "JWT " + testUser.token })
             .send({
-            content: "Missing title and owner",
+            content: "Test Content 2",
         });
         expect(response.statusCode).toBe(400);
-    }));
-    test("Create post with image and like data", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app)
-            .post("/posts")
-            .set("Authorization", `Bearer ${setupTests_1.testUser.token}`)
-            .send({
-            title: "Post with image and likes",
-            content: "Some content here",
-            owner: setupTests_1.testUser._id,
-            image: "https://example.com/image.png",
-            likesCount: 1,
-            likedBy: [setupTests_1.testUser._id],
-        });
-        expect(response.statusCode).toBe(201);
-        expect(response.body.image).toBe("https://example.com/image.png");
-        expect(response.body.likesCount).toBe(1);
-        expect(response.body.likedBy).toContain(setupTests_1.testUser._id);
-    }));
-    test("Check post defaults when fields are missing", () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, supertest_1.default)(setupTests_1.app)
-            .post("/posts")
-            .set("Authorization", `Bearer ${setupTests_1.testUser.token}`)
-            .send({
-            title: "Post with defaults",
-            content: "Only basic data",
-            owner: setupTests_1.testUser._id,
-        });
-        expect(response.statusCode).toBe(201);
-        expect(response.body.image).toBe("");
-        expect(response.body.likesCount).toBe(0);
-        expect(response.body.likedBy).toEqual([]);
     }));
 });

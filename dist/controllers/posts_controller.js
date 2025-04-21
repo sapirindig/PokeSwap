@@ -12,58 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePost = exports.createPost = exports.getPostById = exports.getAllPosts = void 0;
 const posts_model_1 = __importDefault(require("../models/posts_model"));
-const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { owner } = req.query;
-        const filter = owner ? { owner } : {};
-        const posts = yield posts_model_1.default.find(filter);
-        res.json(posts);
+const base_controller_1 = __importDefault(require("./base_controller"));
+class PostsController extends base_controller_1.default {
+    constructor() {
+        super(posts_model_1.default);
     }
-    catch (err) {
-        res.status(500).json({ message: err.message });
+    create(req, res) {
+        const _super = Object.create(null, {
+            create: { get: () => super.create }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            const userId = req.params.userId;
+            const post = Object.assign(Object.assign({}, req.body), { owner: userId });
+            req.body = post;
+            _super.create.call(this, req, res);
+        });
     }
-});
-exports.getAllPosts = getAllPosts;
-const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const post = yield posts_model_1.default.findById(req.params.id);
-        if (!post) {
-            res.status(404).json({ message: "Post not found" });
-            return;
-        }
-        res.json(post);
-    }
-    catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-exports.getPostById = getPostById;
-const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("POST request received at /posts");
-    console.log("Body:", req.body);
-    try {
-        const newPost = yield posts_model_1.default.create(req.body);
-        res.status(201).json(newPost);
-    }
-    catch (err) {
-        console.error("Error creating post:", err.message);
-        res.status(400).json({ message: err.message });
-    }
-});
-exports.createPost = createPost;
-const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const deleted = yield posts_model_1.default.findByIdAndDelete(req.params.id);
-        if (!deleted) {
-            res.status(404).json({ message: "Post not found" });
-            return;
-        }
-        res.json({ message: "Post deleted" });
-    }
-    catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-exports.deletePost = deletePost;
+    ;
+}
+exports.default = new PostsController();

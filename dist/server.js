@@ -1,56 +1,40 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const mongoose_1 = __importDefault(require("mongoose"));
-const dotenv = __importStar(require("dotenv"));
-dotenv.config();
 const body_parser_1 = __importDefault(require("body-parser"));
+const express_1 = __importDefault(require("express"));
 const posts_routes_1 = __importDefault(require("./routes/posts_routes"));
-dotenv.config();
+const comments_routes_1 = __importDefault(require("./routes/comments_routes"));
+const auth_routes_1 = __importDefault(require("./routes/auth_routes"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
-mongoose_1.default.connect(process.env.DB_CONNECTION)
-    .then(() => console.log("Connected to Database"))
-    .catch((err) => console.error("MongoDB connection error:", err));
-app.use('/posts', posts_routes_1.default);
-app.get('/', (req, res) => {
-    res.send('Hello World!@@@@@@@@@');
-});
-exports.default = app;
+app.use("/posts", posts_routes_1.default);
+app.use("/comments", comments_routes_1.default);
+app.use("/auth", auth_routes_1.default);
+const db = mongoose_1.default.connection;
+db.on("error", (error) => console.error(error));
+db.once("open", () => console.log("Connected to database"));
+const initApp = () => {
+    return new Promise((resolve, reject) => {
+        if (!process.env.DB_CONNECT) {
+            reject("DB_CONNECT is not defined in .env file");
+        }
+        else {
+            mongoose_1.default
+                .connect(process.env.DB_CONNECT)
+                .then(() => {
+                resolve(app);
+            })
+                .catch((error) => {
+                reject(error);
+            });
+        }
+    });
+};
+exports.default = initApp;
