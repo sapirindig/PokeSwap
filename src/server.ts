@@ -1,12 +1,12 @@
+
+import dotenv from "dotenv";
+dotenv.config();
 import bodyParser from "body-parser";
 import express, { Express } from "express";
 import postsRoute from "./routes/posts_routes";
 import commentsRoute from "./routes/comments_routes";
 import authRoutes from "./routes/auth_routes";
 import mongoose from "mongoose";
-
-import dotenv from "dotenv";
-dotenv.config();
 
 
 const app = express();
