@@ -7,6 +7,9 @@ import postsRoute from "./routes/posts_routes";
 import commentsRoute from "./routes/comments_routes";
 import authRoutes from "./routes/auth_routes";
 import mongoose from "mongoose";
+import swaggerUI from "swagger-ui-express";
+import swaggerJsDoc from "swagger-jsdoc";
+
 
 
 const app = express();
@@ -15,6 +18,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
 app.use("/auth", authRoutes);
+
+const options = {
+  definition: {
+  openapi: "3.0.0",
+  info: {
+  title: "Web Dev 2022 REST API",
+  version: "1.0.0",
+  description: "REST server including authentication using JWT",
+  },
+  servers: [{url: "http://localhost:" + process.env.PORT,},],
+  },
+  apis: ["./src/routes/*.ts"],
+  };
+  const specs = swaggerJsDoc(options);
+  app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
+ 
 
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));

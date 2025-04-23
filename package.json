@@ -4,13 +4,13 @@
   "description": "PokeSwap is a digital platform for showcasing, trading, and collecting Pokémon cards between users.",
   "main": "app.js",
   "scripts": {
-    "start": "tsc && node dist/app.js",
-    "dev": "nodemon ./src/app.ts",
-    "lint": "eslint . --ext .ts",
-    "test": "jest --detectOpenHandles --forceExit --runInBand",
-    "testAuth": "jest --detectOpenHandles --forceExit auth.test.ts",
-    "testPost": "jest --detectOpenHandles --forceExit posts.test.ts",
-    "testComments": "jest --detectOpenHandles --forceExit comments.test.ts"
+    "dev": "shx cp .env_dev .env && nodemon ./src/app.ts",
+    "start": "shx cp .env_dev .env && tsc && node ./dist/app.js",
+    "test": "shx cp .env_test .env && jest --detectOpenHandles --forceExit --runInBand",
+    "testAuth": "shx cp .env_test .env && jest --detectOpenHandles --forceExit auth.test.ts",
+    "testPost": "shx cp .env_test .env && jest --detectOpenHandles --forceExit posts.test.ts",
+    "testComments": "shx cp .env_test .env && jest --detectOpenHandles --forceExit comments.test.ts",
+    "lint": "eslint . --ext .ts"
   },
   "author": "Sapir Indig",
   "license": "ISC",
@@ -20,7 +20,9 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.13.2"
+    "mongoose": "^8.13.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -28,9 +30,12 @@
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^9.25.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.9",
+    "shx": "^0.4.0",
     "supertest": "^7.1.0",
     "ts-jest": "^29.3.2",
     "typescript": "^5.8.3"
