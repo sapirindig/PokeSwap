@@ -29,7 +29,8 @@ beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
     yield users_model_1.default.deleteMany();
     yield (0, supertest_1.default)(app).post("/auth/register").send(testUser);
     const res = yield (0, supertest_1.default)(app).post("/auth/login").send(testUser);
-    testUser.token = res.body.token;
+    console.log("LOGIN RESPONSE:", res.body);
+    testUser.token = res.body.accessToken;
     testUser._id = res.body._id;
     expect(testUser.token).toBeDefined();
 }));

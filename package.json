@@ -9,7 +9,8 @@
     "lint": "eslint . --ext .ts",
     "test": "jest --detectOpenHandles --forceExit --runInBand",
     "testAuth": "jest --detectOpenHandles --forceExit auth.test.ts",
-    "testPost": "jest --detectOpenHandles --forceExit posts.test.ts"
+    "testPost": "jest --detectOpenHandles --forceExit posts.test.ts",
+    "testComments": "jest --detectOpenHandles --forceExit comments.test.ts"
   },
   "author": "Sapir Indig",
   "license": "ISC",

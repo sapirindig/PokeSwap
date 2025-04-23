@@ -32,22 +32,19 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 const generateToken = (userId) => {
-    if (!process.env.TOKEN_SECRET) {
+    const tokenSecret = process.env.TOKEN_SECRET;
+    const tokenExpires = process.env.TOKEN_EXPIRES;
+    const refreshExpires = process.env.REFRESH_TOKEN_EXPIRES;
+    if (!tokenSecret || !tokenExpires || !refreshExpires) {
+        console.error('Missing environment variables');
         return null;
     }
-    // generate token
     const random = Math.random().toString();
-    const accessToken = jsonwebtoken_1.default.sign({
-        _id: userId,
-        random: random
-    }, process.env.TOKEN_SECRET, { expiresIn: process.env.TOKEN_EXPIRES });
-    const refreshToken = jsonwebtoken_1.default.sign({
-        _id: userId,
-        random: random
-    }, process.env.TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES });
+    const accessToken = jsonwebtoken_1.default.sign({ _id: userId, random }, tokenSecret, { expiresIn: tokenExpires });
+    const refreshToken = jsonwebtoken_1.default.sign({ _id: userId, random }, tokenSecret, { expiresIn: refreshExpires });
     return {
-        accessToken: accessToken,
-        refreshToken: refreshToken
+        accessToken,
+        refreshToken
     };
 };
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

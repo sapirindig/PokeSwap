@@ -2,15 +2,46 @@ import request from "supertest";
 import initApp from "../server";
 import mongoose from "mongoose";
 import commentsModel from "../models/comment_model";
+import postModel from "../models/posts_model";
+import userModel, { IUser } from "../models/users_model";
 import { Express } from "express";
 import testComments from "./test_comments.json";
 
-var app: Express;
+let app: Express;
+let token: string;
+let userId: string;
+let postId: string;
 
 beforeAll(async () => {
   console.log("beforeAll");
   app = await initApp();
   await commentsModel.deleteMany();
+  await postModel.deleteMany();
+  await userModel.deleteMany();
+
+  const testUser = { email: "test@user.com", password: "testpassword" };
+
+  // רישום והתחברות
+  await request(app).post("/auth/register").send(testUser);
+  const res = await request(app).post("/auth/login").send(testUser);
+  token = res.body.accessToken;
+  userId = res.body._id;
+
+  // יצירת פוסט
+  const postRes = await request(app)
+    .post("/posts")
+    .set({ authorization: "JWT " + token })
+    .send({
+      title: "Post for comments",
+      content: "Post content",
+      owner: userId,
+    });
+
+  postId = postRes.body._id;
+
+  // עדכון הבדיקות עם ערכים אמיתיים
+  testComments[0].owner = userId;
+  testComments[0].postId = postId;
 });
 
 afterAll((done) => {
@@ -29,7 +60,11 @@ describe("Comments Tests", () => {
   });
 
   test("Test Create Comment", async () => {
-    const response = await request(app).post("/comments").send(testComments[0]);
+    const response = await request(app)
+      .post("/comments")
+      .set({ authorization: "JWT " + token })
+      .send(testComments[0]);
+
     expect(response.statusCode).toBe(201);
     expect(response.body.comment).toBe(testComments[0].comment);
     expect(response.body.postId).toBe(testComments[0].postId);
@@ -37,7 +72,7 @@ describe("Comments Tests", () => {
     commentId = response.body._id;
   });
 
-  test("Test get commenty by owner", async () => {
+  test("Test get comment by owner", async () => {
     const response = await request(app).get("/comments?owner=" + testComments[0].owner);
     expect(response.statusCode).toBe(200);
     expect(response.body.length).toBe(1);
@@ -53,34 +88,4 @@ describe("Comments Tests", () => {
     expect(response.body.postId).toBe(testComments[0].postId);
     expect(response.body.owner).toBe(testComments[0].owner);
   });
-
-  // test("Test Create Post 2", async () => {
-  //   const response = await request(app).post("/posts").send({
-  //     title: "Test Post 2",
-  //     content: "Test Content 2",
-  //     owner: "TestOwner2",
-  //   });
-  //   expect(response.statusCode).toBe(201);
-  // });
-
-  // test("Posts test get all 2", async () => {
-  //   const response = await request(app).get("/posts");
-  //   expect(response.statusCode).toBe(200);
-  //   expect(response.body.length).toBe(2);
-  // });
-
-  // test("Test Delete Post", async () => {
-  //   const response = await request(app).delete("/posts/" + postId);
-  //   expect(response.statusCode).toBe(200);
-  //   const response2 = await request(app).get("/posts/" + postId);
-  //   expect(response2.statusCode).toBe(404);
-  // });
-
-  // test("Test Create Post fail", async () => {
-  //   const response = await request(app).post("/posts").send({
-  //     title: "Test Post 2",
-  //     content: "Test Content 2",
-  //   });
-  //   expect(response.statusCode).toBe(400);
-  // });
 });

@@ -17,15 +17,16 @@ beforeAll(async () => {
   console.log("beforeAll");
   app = await initApp();
   await postModel.deleteMany();
-
   await userModel.deleteMany();
+
   await request(app).post("/auth/register").send(testUser);
+
   const res = await request(app).post("/auth/login").send(testUser);
-  testUser.token = res.body.token;
-  testUser._id = res.body._id;
+  console.log("LOGIN RESPONSE:", res.body);  
+  testUser.token = res.body.accessToken;
+  testUser._id = res.body._id;  
   expect(testUser.token).toBeDefined();
 });
-
 afterAll((done) => {
   console.log("afterAll");
   mongoose.connection.close();
