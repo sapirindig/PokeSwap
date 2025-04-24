@@ -28,9 +28,11 @@ type User = IUser & {
 };
 
 const testUser: User = {
+  username: "testuser",
   email: "test@user.com",
   password: "testpassword",
-}
+};
+
 
 describe("Auth Tests", () => {
   test("Auth test register", async () => {

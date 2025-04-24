@@ -19,7 +19,7 @@ beforeAll(async () => {
   await postModel.deleteMany();
   await userModel.deleteMany();
 
-  const testUser = { email: "test@user.com", password: "testpassword" };
+  const testUser = { email: "test@user.com", password: "testpassword", username: "testuser" };
 
   // רישום והתחברות
   await request(app).post("/auth/register").send(testUser);
@@ -30,7 +30,7 @@ beforeAll(async () => {
   // יצירת פוסט
   const postRes = await request(app)
     .post("/posts")
-    .set({ authorization: "JWT " + token })
+    .set("Authorization", `Bearer ${token}`)
     .send({
       title: "Post for comments",
       content: "Post content",
@@ -62,7 +62,7 @@ describe("Comments Tests", () => {
   test("Test Create Comment", async () => {
     const response = await request(app)
       .post("/comments")
-      .set({ authorization: "JWT " + token })
+      .set("Authorization", `Bearer ${token}`)
       .send(testComments[0]);
 
     expect(response.statusCode).toBe(201);

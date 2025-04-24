@@ -1,20 +1,34 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import userModel, { IUser } from '../models/users_model';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
 import { Document } from 'mongoose';
 
-const register = async (req: Request, res: Response) => {
+
+const register = async (req: Request, res: Response, next: NextFunction) => {
+
     try {
-        const password = req.body.password;
+        const { email, password, username } = req.body;
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         const user = await userModel.create({
-            email: req.body.email,
+            email: email,
             password: hashedPassword,
+            username: username,
         });
-        res.status(200).send(user);
+
+        const tokens = generateToken(user._id.toString());
+
+        if (!tokens) {
+            return res.status(500).send('Server Error: Token generation failed');
+        }
+
+        res.status(200).send({
+            user: user,
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+        });
     } catch (err) {
         res.status(400).send(err);
     }
@@ -188,24 +202,33 @@ type Payload = {
 };
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const authorization = req.header('authorization');
-    const token = authorization && authorization.split(' ')[1];
+    console.log("Checking authMiddleware...");
+
+    const authorization = req.header("authorization");
+    console.log("Raw Authorization header:", authorization);
+
+    const token = authorization && authorization.split(" ")[1];
+    console.log("Extracted token:", token);
 
     if (!token) {
-        res.status(401).send('Access Denied');
-        return;
+        console.log("No token found in Authorization header");
+        return res.status(401).send("Access Denied");
     }
+
     if (!process.env.TOKEN_SECRET) {
-        res.status(500).send('Server Error');
-        return;
+        console.log("Missing TOKEN_SECRET in env");
+        return res.status(500).send("Server Error");
     }
 
     jwt.verify(token, process.env.TOKEN_SECRET, (err, payload) => {
         if (err) {
-            res.status(401).send('Access Denied');
-            return;
+            console.log("Invalid token:", err.message);
+            return res.status(401).send("Access Denied");
         }
-        req.params.userId = (payload as Payload)._id;
+
+        const userId = (payload as any)._id;
+        console.log("Token valid - userId:", userId);
+        req.params.userId = userId;
         next();
     });
 };

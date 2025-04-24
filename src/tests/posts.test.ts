@@ -9,9 +9,10 @@ var app: Express;
 
 type User = IUser & { token?: string };
 const testUser: User = {
-  email: "test@user.com",
-  password: "testpassword",
-}
+  email: "test@example.com",
+  password: "123456",
+  username: "tester" 
+};
 
 beforeAll(async () => {
   console.log("beforeAll");

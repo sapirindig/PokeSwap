@@ -9,6 +9,8 @@ import authRoutes from "./routes/auth_routes";
 import mongoose from "mongoose";
 import swaggerUI from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
+import cors from "cors";
+
 
 
 
@@ -18,6 +20,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
 app.use("/auth", authRoutes);
+
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true
+}));
+
 
 const options = {
   definition: {
