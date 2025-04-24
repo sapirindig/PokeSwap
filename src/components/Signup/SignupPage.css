@@ -72,3 +72,67 @@
     background-color: #1a4301;
   }
   
+  .auth-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  .image-section {
+    width: 65%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .login-page {
+    width: 45%;
+    background-color: #fffceb;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .auth-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: #fffceb;
+  }
+  
+  .signup-page {
+    width: 45%;
+    background-color: #fffceb;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .image-section {
+    width: 65%;
+    height: 100vh;
+    background-color: #fffceb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+  }
+  
+  .slider-image {
+    width: 100%;
+    height: 90vh;
+    object-fit: cover;
+    border-radius: 20px;
+    transition: opacity 1s ease-in-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .image-section img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+  }
+  
