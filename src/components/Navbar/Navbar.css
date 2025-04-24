@@ -1,0 +1,89 @@
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 40px;
+    background-color: #9d0208;
+    height: 100px;
+    position: relative;
+    transition: border-bottom 0.3s ease-in-out;
+  }
+  
+  .navbar:hover {
+    border-bottom: 6px solid yellow;
+  }
+  
+  .navbar-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .logo {
+    width: 100px;
+    height: auto;
+  }
+  
+  .subtitle {
+    margin: 0;
+    font-size: 12px;
+    color: white;
+    font-weight: bold;
+    line-height: 3;
+  }
+  
+  .navbar-center {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: black;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .nav-item.hovered {
+    color: white;
+  }
+  
+  .arrow-icon {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: rgb(235, 232, 232);
+    border-radius: 20px;
+    padding: 4px 10px;
+    gap: 5px;
+    height: 32px;
+  }
+  
+  .search-box input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: transparent;
+    width: 200px;
+  }
+  
+  .icon {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  
+  .navbar-right .pokaball-icon {
+    width: 35px;
+    height: 35px;
+  }
+ 
