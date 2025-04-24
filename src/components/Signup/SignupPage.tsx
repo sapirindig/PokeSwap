@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import './SignupPage.css';
+import ImageSlider from '../ImageSlider/ImageSlider';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const SignupPage = () => {
       });
 
       if (response.status === 409) {
-        setErrorMessage('משתמש עם כתובת האימייל הזו כבר קיים');
+        setErrorMessage('User details already exist.');
         return;
       }
 
@@ -91,8 +92,8 @@ const SignupPage = () => {
       </div>
 
       <div className="image-section">
-        <img src="/wallpeper/1.jpg" className="slider-image" />
-      </div>
+  <ImageSlider />
+</div>
     </div>
   );
 };
