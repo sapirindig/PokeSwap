@@ -16,12 +16,17 @@ const LoginPage = () => {
           <input type="email" placeholder="Email" required />
           <input type="password" placeholder="Password" required />
           <button type="submit" className="btn-email">Sign in</button>
+          
         </form>
-
+  
         <button className="btn-google">
           <img src="/google.png" alt="Google icon" />
           <span>Sign in with Google</span>
         </button>
+      </div>
+
+      <div className="signup-link" onClick={() => console.log('Navigate to sign up')}>
+      Don't have an account? <span>Become a PokeTrader</span>
       </div>
     </div>
   );
