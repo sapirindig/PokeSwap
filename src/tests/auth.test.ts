@@ -188,4 +188,22 @@ describe("Auth Tests", () => {
     });
     expect(response4.statusCode).toBe(201);
   });
+
+  test("Auth test update profile", async () => {
+    const response = await request(app)
+      .patch(baseUrl + "/update-profile")
+      .set("Authorization", "Bearer " + testUser.accessToken)
+      .send({
+        username: "updatedUser",
+        email: "updated@email.com"
+      });
+    
+    expect(response.statusCode).toBe(200);
+    expect(response.body.username).toBe("updatedUser");
+    expect(response.body.email).toBe("updated@email.com");
+  
+    testUser.username = response.body.username;
+    testUser.email = response.body.email;
+  });
+  
 });

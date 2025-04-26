@@ -299,13 +299,45 @@ const me = async (req: Request, res: Response) => {
       res.status(500).send('Server Error');
     }
   };
+
+  const updateProfile = async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId;
+      const { username, email } = req.body;
+  
+      if (!username || !email) {
+        return res.status(400).send('Username and Email are required');
+      }
+  
+      const user = await userModel.findByIdAndUpdate(
+        userId,
+        { username, email },
+        { new: true, runValidators: true }
+      ).select('username email');
+  
+      if (!user) {
+        return res.status(404).send('User not found');
+      }
+  
+      res.status(200).send({
+        username: user.username,
+        email: user.email
+      });
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      res.status(500).send('Server Error');
+    }
+  };
+  
   
 
-export default {
+  export default {
     register,
     login,
     refresh,
     logout,
     googleLogin,
-    me
-};
+    me,
+    updateProfile
+  };
+  

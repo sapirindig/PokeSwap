@@ -245,6 +245,54 @@ router.post("/google-login", authController.googleLogin);
  */
 router.get("/me", authMiddleware, authController.me);
 
+/**
+ * @swagger
+ * /auth/update-profile:
+ *   patch:
+ *     summary: Update user's profile
+ *     description: Updates the username and email of the authenticated user
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: 'NewUsername'
+ *               email:
+ *                 type: string
+ *                 example: 'newemail@example.com'
+ *     responses:
+ *       200:
+ *         description: Successfully updated profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *       400:
+ *         description: Missing fields or bad request
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+router.patch("/update-profile", authMiddleware, authController.updateProfile);
+
+
 
 
 
