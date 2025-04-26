@@ -156,6 +156,7 @@ const googleLogin = async (req: Request, res: Response) => {
       res.status(400).send('Google login failed');
     }
   };
+
   
 
 type tUser = Document<unknown, {}, IUser> & IUser & Required<{
@@ -283,10 +284,28 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     });
 };
 
+const me = async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId;
+      const user = await userModel.findById(userId).select('username email');
+      if (!user) {
+        return res.status(404).send('User not found');
+      }
+      res.status(200).send({
+        username: user.username,
+        email: user.email
+      });
+    } catch (err) {
+      res.status(500).send('Server Error');
+    }
+  };
+  
+
 export default {
     register,
     login,
     refresh,
     logout,
-    googleLogin
+    googleLogin,
+    me
 };

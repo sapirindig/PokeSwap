@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import authController from "../controllers/auth_controller";
+import { authMiddleware } from "../controllers/auth_controller";
 
 /**
 * @swagger
@@ -212,6 +213,38 @@ router.post("/logout", authController.logout);
  *         description: Server error
  */
 router.post("/google-login", authController.googleLogin);
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get the current user's profile
+ *     description: Returns the username and email of the authenticated user
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                   example: 'AshKetchum'
+ *                 email:
+ *                   type: string
+ *                   example: 'ash@pokemail.com'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *       500:
+ *         description: Server error
+ */
+router.get("/me", authMiddleware, authController.me);
+
 
 
 

@@ -24,7 +24,8 @@ const baseUrl = "/auth";
 
 type User = IUser & {
   accessToken?: string,
-  refreshToken?: string
+  refreshToken?: string,
+  _id?: string
 };
 
 const testUser: User = {
@@ -33,19 +34,18 @@ const testUser: User = {
   password: "testpassword",
 };
 
-
 describe("Auth Tests", () => {
   test("Auth test register", async () => {
     const response = await request(app).post(baseUrl + "/register").send(testUser);
     expect(response.statusCode).toBe(200);
   });
 
-  test("Auth test register fail", async () => {
+  test("Auth test duplicate register fail", async () => {
     const response = await request(app).post(baseUrl + "/register").send(testUser);
     expect(response.statusCode).not.toBe(200);
   });
 
-  test("Auth test register fail", async () => {
+  test("Auth test incomplete register fail", async () => {
     const response = await request(app).post(baseUrl + "/register").send({
       email: "sdsdfsd",
     });
@@ -79,35 +79,34 @@ describe("Auth Tests", () => {
     expect(refreshToken).not.toBe(testUser.refreshToken);
   });
 
-  test("Auth test login fail", async () => {
+  test("Auth test login fail wrong password", async () => {
     const response = await request(app).post(baseUrl + "/login").send({
       email: testUser.email,
-      password: "sdfsd",
+      password: "wrongpassword",
     });
     expect(response.statusCode).not.toBe(200);
-
-    const response2 = await request(app).post(baseUrl + "/login").send({
-      email: "dsfasd",
-      password: "sdfsd",
-    });
-    expect(response2.statusCode).not.toBe(200);
   });
 
-  test("Auth test me", async () => {
-    const response = await request(app).post("/posts").send({
-      title: "Test Post",
-      content: "Test Content",
-      owner: "sdfSd",
+  test("Auth test login fail wrong email", async () => {
+    const response = await request(app).post(baseUrl + "/login").send({
+      email: "wrong@email.com",
+      password: "wrongpassword",
     });
-    expect(response.statusCode).not.toBe(201);
-    const response2 = await request(app).post("/posts").set(
-      { authorization: "JWT " + testUser.accessToken }
-    ).send({
-      title: "Test Post",
-      content: "Test Content",
-      owner: "sdfSd",
-    });
-    expect(response2.statusCode).toBe(201);
+    expect(response.statusCode).not.toBe(200);
+  });
+
+  test("Auth test me endpoint", async () => {
+    const response = await request(app)
+      .get(baseUrl + "/me")
+      .set("Authorization", "Bearer " + testUser.accessToken);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.username).toBe(testUser.username);
+    expect(response.body.email).toBe(testUser.email);
+  });
+
+  test("Auth test google login fail missing token", async () => {
+    const response = await request(app).post(baseUrl + "/google-login").send({});
+    expect(response.statusCode).toBe(400);
   });
 
   test("Test refresh token", async () => {
@@ -154,11 +153,10 @@ describe("Auth Tests", () => {
       refreshToken: testUser.refreshToken,
     });
     expect(response3.statusCode).not.toBe(200);
-
   });
 
   jest.setTimeout(10000);
-  test("Test timeout token ", async () => {
+  test("Test timeout token", async () => {
     const response = await request(app).post(baseUrl + "/login").send(testUser);
     expect(response.statusCode).toBe(200);
     testUser.accessToken = response.body.accessToken;
