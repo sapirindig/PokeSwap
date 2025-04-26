@@ -32,7 +32,7 @@ const Navbar = () => {
       </div>
 
       <div className="navbar-right">
-      <img src="/icons/pokaball.png" alt="pokaball" />
+      <img src="/icons/pokaball.png" alt="pokaball"  className="pokaball-icon" />
       </div>
     </nav>
   );
