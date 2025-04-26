@@ -1,8 +1,14 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
   const [hovered, setHovered] = useState('');
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
 
   return (
     <nav className="navbar">
@@ -18,6 +24,8 @@ const Navbar = () => {
             className={`nav-item ${hovered === item ? 'hovered' : ''}`}
             onMouseEnter={() => setHovered(item)}
             onMouseLeave={() => setHovered('')}
+            onClick={item === 'PROFILE' ? handleProfileClick : undefined} 
+            style={item === 'PROFILE' ? { cursor: 'pointer' } : {}}
           >
             {item}
             <img src="/icons/down-arrow.png" className="arrow-icon" alt="arrow" />
@@ -32,7 +40,7 @@ const Navbar = () => {
       </div>
 
       <div className="navbar-right">
-      <img src="/icons/pokaball.png" alt="pokaball"  className="pokaball-icon" />
+        <img src="/icons/pokaball.png" alt="pokaball" className="pokaball-icon" />
       </div>
     </nav>
   );
