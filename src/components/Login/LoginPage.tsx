@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './LoginPage.css';
 import ImageSlider from '../ImageSlider/ImageSlider';
 import { useNavigate } from 'react-router-dom';
-
+import { useGoogleLogin } from '@react-oauth/google';
 const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
@@ -40,6 +40,32 @@ const LoginPage = () => {
     }
   };
 
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/google-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: tokenResponse.access_token }), 
+        });
+  
+        if (!res.ok) {
+          const message = await res.text();
+          throw new Error(message);
+        }
+  
+        const data = await res.json();
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        navigate('/home');
+      } catch (error) {
+        console.error('Google login failed:', error);
+      }
+    },
+    onError: () => console.error('Google login failed'),
+  });
+  
+
   const handleNavigateToSignup = () => {
     navigate('/signup');
   };
@@ -68,7 +94,7 @@ const LoginPage = () => {
 
           {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-          <button className="btn-google">
+          <button className="btn-google" onClick={() => loginWithGoogle()}>
             <img src="/google.png" alt="Google icon" />
             <span>Sign in with Google</span>
           </button>
