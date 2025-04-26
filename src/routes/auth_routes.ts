@@ -174,5 +174,45 @@ router.post("/refresh", authController.refresh);
  */
 router.post("/logout", authController.logout);
 
+/**
+ * @swagger
+ * /auth/google-login:
+ *   post:
+ *     summary: Google Sign-In
+ *     description: Authenticate user via Google and return tokens
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               idToken:
+ *                 type: string
+ *                 description: Google idToken from client
+ *     responses:
+ *       200:
+ *         description: Successful Google login
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *                 _id:
+ *                   type: string
+ *       400:
+ *         description: Invalid token or request
+ *       500:
+ *         description: Server error
+ */
+router.post("/google-login", authController.googleLogin);
+
+
 
 export default router;

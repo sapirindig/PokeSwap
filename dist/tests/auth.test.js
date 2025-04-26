@@ -31,6 +31,7 @@ afterAll((done) => {
 });
 const baseUrl = "/auth";
 const testUser = {
+    username: "testuser",
     email: "test@user.com",
     password: "testpassword",
 };

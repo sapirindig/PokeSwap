@@ -16,16 +16,26 @@ exports.authMiddleware = void 0;
 const users_model_1 = __importDefault(require("../models/users_model"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const google_auth_library_1 = require("google-auth-library");
+const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const password = req.body.password;
+        const { email, password, username } = req.body;
         const salt = yield bcrypt_1.default.genSalt(10);
         const hashedPassword = yield bcrypt_1.default.hash(password, salt);
         const user = yield users_model_1.default.create({
-            email: req.body.email,
+            email: email,
             password: hashedPassword,
+            username: username,
         });
-        res.status(200).send(user);
+        const tokens = generateToken(user._id.toString());
+        if (!tokens) {
+            return res.status(500).send('Server Error: Token generation failed');
+        }
+        res.status(200).send({
+            user: user,
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+        });
     }
     catch (err) {
         res.status(400).send(err);
@@ -82,6 +92,44 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (err) {
         res.status(400).send(err);
+    }
+});
+const client = new google_auth_library_1.OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { idToken } = req.body;
+        if (!idToken) {
+            return res.status(400).send('Missing idToken');
+        }
+        const ticket = yield client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        if (!payload || !payload.email) {
+            return res.status(400).send('Invalid Google payload');
+        }
+        let user = yield users_model_1.default.findOne({ email: payload.email });
+        if (!user) {
+            user = yield users_model_1.default.create({
+                username: payload.name || payload.email.split('@')[0],
+                email: payload.email,
+                password: Math.random().toString(36),
+            });
+        }
+        const tokens = generateToken(user._id.toString());
+        if (!tokens) {
+            return res.status(500).send('Token generation failed');
+        }
+        res.status(200).send({
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            _id: user._id
+        });
+    }
+    catch (err) {
+        console.error('Google login error:', err);
+        res.status(400).send('Google login failed');
     }
 });
 const verifyRefreshToken = (refreshToken) => {
@@ -166,22 +214,27 @@ const refresh = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 const authMiddleware = (req, res, next) => {
-    const authorization = req.header('authorization');
-    const token = authorization && authorization.split(' ')[1];
+    console.log("Checking authMiddleware...");
+    const authorization = req.header("authorization");
+    console.log("Raw Authorization header:", authorization);
+    const token = authorization && authorization.split(" ")[1];
+    console.log("Extracted token:", token);
     if (!token) {
-        res.status(401).send('Access Denied');
-        return;
+        console.log("No token found in Authorization header");
+        return res.status(401).send("Access Denied");
     }
     if (!process.env.TOKEN_SECRET) {
-        res.status(500).send('Server Error');
-        return;
+        console.log("Missing TOKEN_SECRET in env");
+        return res.status(500).send("Server Error");
     }
     jsonwebtoken_1.default.verify(token, process.env.TOKEN_SECRET, (err, payload) => {
         if (err) {
-            res.status(401).send('Access Denied');
-            return;
+            console.log("Invalid token:", err.message);
+            return res.status(401).send("Access Denied");
         }
-        req.params.userId = payload._id;
+        const userId = payload._id;
+        console.log("Token valid - userId:", userId);
+        req.params.userId = userId;
         next();
     });
 };
@@ -190,5 +243,6 @@ exports.default = {
     register,
     login,
     refresh,
-    logout
+    logout,
+    googleLogin
 };

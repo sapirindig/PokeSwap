@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
 import { Document } from 'mongoose';
+import { OAuth2Client } from 'google-auth-library';
 
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -107,6 +108,55 @@ const login = async (req: Request, res: Response) => {
         res.status(400).send(err);
     }
 };
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const googleLogin = async (req: Request, res: Response) => {
+    try {
+      const { idToken, access_token } = req.body;
+  
+      if (!access_token) {
+        return res.status(400).send('Missing access_token');
+      }
+  
+      const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+  
+      const payload = await userInfoResponse.json();
+  
+      if (!payload || !payload.email) {
+        return res.status(400).send('Invalid Google payload');
+      }
+  
+      let user = await userModel.findOne({ email: payload.email });
+      if (!user) {
+        user = await userModel.create({
+          username: payload.name || payload.email.split('@')[0],
+          email: payload.email,
+          password: Math.random().toString(36), 
+        });
+      }
+  
+      const tokens = generateToken(user._id.toString());
+      if (!tokens) {
+        return res.status(500).send('Token generation failed');
+      }
+  
+      res.status(200).send({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        _id: user._id
+      });
+  
+    } catch (err) {
+      console.error('Google login error:', err);
+      res.status(400).send('Google login failed');
+    }
+  };
+  
 
 type tUser = Document<unknown, {}, IUser> & IUser & Required<{
     _id: string;
@@ -237,5 +287,6 @@ export default {
     register,
     login,
     refresh,
-    logout
+    logout,
+    googleLogin
 };

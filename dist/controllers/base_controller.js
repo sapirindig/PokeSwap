@@ -68,7 +68,7 @@ class BaseController {
             const id = req.params.id;
             try {
                 const rs = yield this.model.findByIdAndDelete(id);
-                res.status(200).send(rs);
+                res.status(200).send("deleted");
             }
             catch (error) {
                 res.status(400).send(error);

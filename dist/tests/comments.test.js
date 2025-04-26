@@ -29,7 +29,7 @@ beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
     yield comment_model_1.default.deleteMany();
     yield posts_model_1.default.deleteMany();
     yield users_model_1.default.deleteMany();
-    const testUser = { email: "test@user.com", password: "testpassword" };
+    const testUser = { email: "test@user.com", password: "testpassword", username: "testuser" };
     // רישום והתחברות
     yield (0, supertest_1.default)(app).post("/auth/register").send(testUser);
     const res = yield (0, supertest_1.default)(app).post("/auth/login").send(testUser);
@@ -38,7 +38,7 @@ beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
     // יצירת פוסט
     const postRes = yield (0, supertest_1.default)(app)
         .post("/posts")
-        .set({ authorization: "JWT " + token })
+        .set("Authorization", `Bearer ${token}`)
         .send({
         title: "Post for comments",
         content: "Post content",
@@ -64,7 +64,7 @@ describe("Comments Tests", () => {
     test("Test Create Comment", () => __awaiter(void 0, void 0, void 0, function* () {
         const response = yield (0, supertest_1.default)(app)
             .post("/comments")
-            .set({ authorization: "JWT " + token })
+            .set("Authorization", `Bearer ${token}`)
             .send(test_comments_json_1.default[0]);
         expect(response.statusCode).toBe(201);
         expect(response.body.comment).toBe(test_comments_json_1.default[0].comment);

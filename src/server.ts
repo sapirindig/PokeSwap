@@ -11,20 +11,17 @@ import swaggerUI from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
 import cors from "cors";
 
-
-
-
 const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/posts", postsRoute);
-app.use("/comments", commentsRoute);
-app.use("/auth", authRoutes);
 
 app.use(cors({
   origin: "http://localhost:5173", 
   credentials: true
 }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/posts", postsRoute);
+app.use("/comments", commentsRoute);
+app.use("/auth", authRoutes);
 
 
 const options = {

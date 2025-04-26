@@ -19,8 +19,9 @@ const posts_model_1 = __importDefault(require("../models/posts_model"));
 const users_model_1 = __importDefault(require("../models/users_model"));
 var app;
 const testUser = {
-    email: "test@user.com",
-    password: "testpassword",
+    email: "test@example.com",
+    password: "123456",
+    username: "tester"
 };
 beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
     console.log("beforeAll");

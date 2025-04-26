@@ -28,16 +28,21 @@ const auth_controller_1 = __importDefault(require("../controllers/auth_controlle
 *     User:
 *       type: object
 *       required:
+*         - username
 *         - email
 *         - password
 *       properties:
+*         username:
+*           type: string
+*           description: The user's name
 *         email:
 *           type: string
-*           description: The user email
+*           description: The user's email
 *         password:
 *           type: string
-*           description: The user password
+*           description: The user's password
 *       example:
+*         username: 'bob'
 *         email: 'bob@gmail.com'
 *         password: '123456'
 */
@@ -164,4 +169,42 @@ router.post("/refresh", auth_controller_1.default.refresh);
  *         description: Server error
  */
 router.post("/logout", auth_controller_1.default.logout);
+/**
+ * @swagger
+ * /auth/google-login:
+ *   post:
+ *     summary: Google Sign-In
+ *     description: Authenticate user via Google and return tokens
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               idToken:
+ *                 type: string
+ *                 description: Google idToken from client
+ *     responses:
+ *       200:
+ *         description: Successful Google login
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *                 _id:
+ *                   type: string
+ *       400:
+ *         description: Invalid token or request
+ *       500:
+ *         description: Server error
+ */
+router.post("/google-login", auth_controller_1.default.googleLogin);
 exports.default = router;
