@@ -6,6 +6,7 @@ export interface IUser {
   password: string;
   _id?: string;
   refreshToken?: string[];
+  imageUrl?: string;
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -25,7 +26,11 @@ const userSchema = new mongoose.Schema<IUser>({
   refreshToken: {
     type: [String],
     default: [],
-  }
+  },
+  imageUrl: {
+    type: String,
+    default: "/uploads/pokeball.png", 
+  },
 });
 
 const userModel = mongoose.model<IUser>("Users", userSchema);

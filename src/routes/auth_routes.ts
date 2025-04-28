@@ -2,6 +2,8 @@ import express from "express";
 const router = express.Router();
 import authController from "../controllers/auth_controller";
 import { authMiddleware } from "../controllers/auth_controller";
+import upload from "../middlewares/uploadMiddleware";
+
 
 /**
 * @swagger
@@ -292,8 +294,44 @@ router.get("/me", authMiddleware, authController.me);
  */
 router.patch("/update-profile", authMiddleware, authController.updateProfile);
 
-
-
-
+/**
+ * @swagger
+ * /auth/upload-profile-image:
+ *   patch:
+ *     summary: Upload a profile image
+ *     description: Uploads a new profile picture for the authenticated user
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               profileImage:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Successfully uploaded image
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 imageUrl:
+ *                   type: string
+ *                   example: '/uploads/your-image-name.png'
+ *       400:
+ *         description: No file uploaded or bad request
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.patch("/upload-profile-image",authMiddleware,upload.single("profileImage"),authController.uploadProfileImage);
 
 export default router;

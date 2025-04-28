@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
 import { Document } from 'mongoose';
 import { OAuth2Client } from 'google-auth-library';
+import path from "path";
 
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -287,33 +288,45 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 const me = async (req: Request, res: Response) => {
     try {
       const userId = req.params.userId;
-      const user = await userModel.findById(userId).select('username email');
+      const user = await userModel.findById(userId).select('username email imageUrl'); 
       if (!user) {
         return res.status(404).send('User not found');
       }
       res.status(200).send({
         username: user.username,
-        email: user.email
+        email: user.email,
+        imageUrl: user.imageUrl, 
       });
     } catch (err) {
+      console.error('Error fetching profile:', err);
       res.status(500).send('Server Error');
     }
   };
+  
 
   const updateProfile = async (req: Request, res: Response) => {
     try {
       const userId = req.params.userId;
-      const { username, email } = req.body;
+      const { username, email, profileImage } = req.body;
   
       if (!username || !email) {
         return res.status(400).send('Username and Email are required');
       }
   
+      const updatedFields: Partial<IUser> = {
+        username,
+        email,
+      };
+  
+      if (profileImage) {
+        updatedFields.imageUrl = profileImage; 
+      }
+  
       const user = await userModel.findByIdAndUpdate(
         userId,
-        { username, email },
+        updatedFields,
         { new: true, runValidators: true }
-      ).select('username email');
+      ).select('username email imageUrl');
   
       if (!user) {
         return res.status(404).send('User not found');
@@ -321,7 +334,8 @@ const me = async (req: Request, res: Response) => {
   
       res.status(200).send({
         username: user.username,
-        email: user.email
+        email: user.email,
+        imageUrl: user.imageUrl,
       });
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -329,8 +343,42 @@ const me = async (req: Request, res: Response) => {
     }
   };
   
-  
 
+  const uploadProfileImage = async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId;
+      let profileImagePath = req.file?.path;
+  
+      if (!profileImagePath) {
+        return res.status(400).send('No image uploaded');
+      }
+
+      profileImagePath = profileImagePath.replace(/\\/g, "/");
+  
+      const updatedUser = await userModel.findByIdAndUpdate(
+        userId,
+        { imageUrl: profileImagePath },
+        { new: true, runValidators: true }
+      ).select('username email imageUrl');
+  
+      if (!updatedUser) {
+        return res.status(404).send('User not found');
+      }
+  
+      res.status(200).send({
+        username: updatedUser.username,
+        email: updatedUser.email,
+        imageUrl: updatedUser.imageUrl,
+      });
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      res.status(500).send('Server Error');
+    }
+  };
+  
+  
+  
+  
   export default {
     register,
     login,
@@ -338,6 +386,9 @@ const me = async (req: Request, res: Response) => {
     logout,
     googleLogin,
     me,
-    updateProfile
-  };
+    updateProfile,
+    uploadProfileImage  
+};
+
+  
   

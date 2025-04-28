@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import postModel from "../models/posts_model";
 import { Express } from "express";
 import userModel, { IUser } from "../models/users_model";
+import path from "path";
+
 
 var app: Express;
 
@@ -205,5 +207,22 @@ describe("Auth Tests", () => {
     testUser.username = response.body.username;
     testUser.email = response.body.email;
   });
+
+  test("Auth test upload profile image", async () => {
+    const response = await request(app)
+      .patch(baseUrl + "/upload-profile-image")
+      .set("Authorization", "Bearer " + testUser.accessToken)
+      .attach("profileImage", path.resolve(__dirname, "./test-image.png")); 
+  
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("username");
+    expect(response.body).toHaveProperty("email");
+    expect(response.body).toHaveProperty("imageUrl");
+  
+    expect(typeof response.body.username).toBe("string");
+    expect(typeof response.body.email).toBe("string");
+    expect(typeof response.body.imageUrl).toBe("string");
+  });
+  
   
 });
