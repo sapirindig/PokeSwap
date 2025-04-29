@@ -8,14 +8,24 @@ class PostsController extends BaseController<IPost> {
     }
 
     async create(req: Request, res: Response) {
-        const userId = req.params.userId;
-        const post = {
-            ...req.body,
-            owner: userId
+        try {
+            const userId = req.body.userId || req.params.userId;
+    
+            const imagePath = req.file ? `postImages/${req.file.filename.replace(/\\/g, "/")}` : "postImages/image.jpg";
+    
+            const post = {
+                ...req.body,
+                image: imagePath,
+                owner: userId
+            };
+    
+            const newPost = await postModel.create(post);
+            res.status(201).json(newPost);
+        } catch (err) {
+            res.status(400).json({ error: err });
         }
-        req.body = post;
-        super.create(req, res);
-    };
+    }
+    
 }
 
 

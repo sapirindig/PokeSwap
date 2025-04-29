@@ -24,6 +24,9 @@ app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
 app.use("/auth", authRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use('/postImages', express.static(path.join(__dirname, 'postImages')));
+
+
 
 
 const options = {

@@ -2,6 +2,8 @@ import express from "express";
 const router = express.Router();
 import postsController from "../controllers/posts_controller";
 import { authMiddleware } from "../controllers/auth_controller";
+import uploadPostImage from "../middlewares/uploadPostImage";
+
 
 
 /**
@@ -130,7 +132,13 @@ router.get("/:id", postsController.getById.bind(postsController));
  *       500:
  *         description: Server error
  */
-router.post("/", authMiddleware, postsController.create.bind(postsController));
+router.post(
+    "/",
+    authMiddleware,
+    uploadPostImage.single("image"),
+    postsController.create.bind(postsController)
+  );
+  
 
 
 /**
