@@ -4,7 +4,7 @@ export interface IPost {
   title: string;
   content: string;
   owner: string;
-  image?: string; // הוספת שדה לתמונה
+  image?: string; 
 }
 
 const postSchema = new mongoose.Schema<IPost>({
