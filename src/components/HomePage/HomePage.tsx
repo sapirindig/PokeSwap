@@ -55,10 +55,10 @@ const HomePage = () => {
           {posts.map((post, index) => (
             <div key={post._id || index} className="post-card">
             <img
-            src={`${import.meta.env.VITE_API_BASE_URL}/${post.image}`}
-            alt="post"
-            className="post-image"
-            />
+  src={`${import.meta.env.VITE_API_BASE_URL}/${post.image}`}
+  alt="post"
+  className="post-image"
+/>
           </div>          
           ))}
         </div>
