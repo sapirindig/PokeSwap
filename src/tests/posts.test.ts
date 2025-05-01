@@ -104,4 +104,14 @@ describe("Posts Tests", () => {
       });
     expect(response.statusCode).toBe(400);
   });
+
+  test("Test get posts by userId route", async () => {
+    const response = await request(app).get(`/posts/user/${testUser._id}`);
+    expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    response.body.forEach((post: any) => {
+      expect(post.owner).toBe(testUser._id);
+    });
+  });
+
 });

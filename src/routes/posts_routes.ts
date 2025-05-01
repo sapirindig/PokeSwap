@@ -132,13 +132,7 @@ router.get("/:id", postsController.getById.bind(postsController));
  *       500:
  *         description: Server error
  */
-router.post(
-    "/",
-    authMiddleware,
-    uploadPostImage.single("image"),
-    postsController.create.bind(postsController)
-  );
-  
+router.post("/",authMiddleware,uploadPostImage.single("image"),postsController.create.bind(postsController));
 
 
 /**
@@ -167,5 +161,35 @@ router.post(
  *         description: Server error
  */
 router.delete("/:id", authMiddleware, postsController.deleteItem.bind(postsController));
+
+/**
+ * @swagger
+ * /posts/user/{userId}:
+ *   get:
+ *     summary: Get all posts by a specific user
+ *     description: Retrieve all posts created by a specific user
+ *     tags:
+ *       - Posts
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user whose posts to retrieve
+ *     responses:
+ *       200:
+ *         description: A list of user's posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Post'
+ *       500:
+ *         description: Server error
+ */
+router.get("/user/:userId", postsController.getPostsByUser.bind(postsController));
+
 
 export default router;

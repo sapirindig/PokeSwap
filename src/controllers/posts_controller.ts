@@ -25,8 +25,18 @@ class PostsController extends BaseController<IPost> {
             res.status(400).json({ error: err });
         }
     }
+
+    async getPostsByUser(req: Request, res: Response) {
+        try {
+          const userId = req.params.userId;
+          const posts = await postModel.find({ owner: userId });
+          res.status(200).json(posts);
+        } catch (err) {
+          res.status(500).json({ error: "Failed to get user's posts" });
+        }
+      }
+      
     
 }
-
 
 export default new PostsController();
