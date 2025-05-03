@@ -10,6 +10,10 @@ const Navbar = () => {
     navigate('/profile');
   };
 
+  const handleHomeClick = () => {
+    navigate('/home');
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-left">
@@ -39,7 +43,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className="navbar-right">
+      <div className="navbar-right" onClick={handleHomeClick} style={{ cursor: 'pointer' }}>
         <img src="/icons/pokaball.png" alt="pokaball" className="pokaball-icon" />
       </div>
     </nav>
