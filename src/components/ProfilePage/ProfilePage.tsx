@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../Navbar/Navbar';
 import ProfileSidebar from '../../components/ProfileSidebar/ProfileSidebar';
 import './ProfilePage.css';
+import EditPostWindow from '../../components/EditPostWindow/EditPostWindow';
 
 interface Post {
   _id?: string;
@@ -13,6 +14,7 @@ interface Post {
 
 const ProfilePage = () => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
   const fetchUserPosts = async () => {
     const token = localStorage.getItem("accessToken");
@@ -33,6 +35,15 @@ const ProfilePage = () => {
     fetchUserPosts();
   }, []);
 
+  const handlePostClick = (post: Post) => {
+    setSelectedPost(post);
+  };
+
+  const handleEditClose = () => {
+    setSelectedPost(null);
+    fetchUserPosts();
+  };
+
   return (
     <div className="profile-page" style={{ backgroundImage: 'url(/pokaballBackground.png)' }}>
       <Navbar />
@@ -40,7 +51,12 @@ const ProfilePage = () => {
         <ProfileSidebar />
         <div className="posts-container">
           {posts.map((post, index) => (
-            <div key={post._id || index} className="post-card">
+            <div
+              key={post._id || index}
+              className="post-card"
+              onClick={() => handlePostClick(post)}
+              style={{ cursor: 'pointer' }}
+            >
               <img
                 src={`${import.meta.env.VITE_API_BASE_URL}/${post.image}`}
                 alt="post"
@@ -49,6 +65,9 @@ const ProfilePage = () => {
             </div>
           ))}
         </div>
+        {selectedPost && (
+          <EditPostWindow post={selectedPost} onClose={handleEditClose} />
+        )}
       </div>
     </div>
   );
