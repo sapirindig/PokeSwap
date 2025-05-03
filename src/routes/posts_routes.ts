@@ -170,32 +170,29 @@ router.delete("/:id", authMiddleware, postsController.deleteItem.bind(postsContr
 
 /**
  * @swagger
- * /posts/user/{userId}:
+ * /posts/user/me:
  *   get:
- *     summary: Get all posts by a specific user
- *     description: Retrieve all posts created by a specific user
+ *     summary: Get all posts of the logged-in user
+ *     description: Retrieve all posts created by the currently authenticated user
  *     tags:
  *       - Posts
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: string
- *         required: true
- *         description: The ID of the user whose posts to retrieve
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: A list of user's posts
+ *         description: A list of the user's posts
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Post'
+ *       401:
+ *         description: Unauthorized – Token missing or invalid
  *       500:
  *         description: Server error
  */
-router.get("/user/:userId", postsController.getPostsByUser.bind(postsController));
+router.get("/user/me", verifyToken, postsController.getMyPosts.bind(postsController));
 
 
 export default router;
