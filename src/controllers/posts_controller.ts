@@ -15,10 +15,12 @@ class PostsController extends BaseController<IPost> {
             const imagePath = req.file ? `postImages/${req.file.filename.replace(/\\/g, "/")}` : "postImages/image.jpg";
     
             const post = {
-                ...req.body,
-                image: imagePath,
-                owner: userId
-            };
+              title: req.body.title,
+              content: req.body.content,
+              image: imagePath,
+              owner: userId
+          };
+          
     
             const newPost = await postModel.create(post);
             res.status(201).json(newPost);

@@ -9,32 +9,42 @@ import path from "path";
 
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, password, username } = req.body;
 
-    try {
-        const { email, password, username } = req.body;
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        const user = await userModel.create({
-            email: email,
-            password: hashedPassword,
-            username: username,
-        });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-        const tokens = generateToken(user._id.toString());
+    const user = await userModel.create({
+      email,
+      password: hashedPassword,
+      username,
+    });
 
-        if (!tokens) {
-            return res.status(500).send('Server Error: Token generation failed');
-        }
+    const tokens = generateToken(user._id.toString());
 
-        res.status(200).send({
-            user: user,
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-        });
-    } catch (err) {
-        res.status(400).send(err);
+    if (!tokens) {
+      return res.status(500).send('Server Error: Token generation failed');
     }
+    
+    if (!user.refreshToken) user.refreshToken = [];
+    user.refreshToken.push(tokens.refreshToken);
+    await user.save();
+
+    res.status(200).send({
+      user: {
+        _id: user._id,
+        email: user.email,
+        username: user.username,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  } catch (err) {
+    res.status(400).send(err);
+  }
 };
+
 
 type tTokens = {
     accessToken: string,

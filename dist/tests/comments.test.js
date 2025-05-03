@@ -38,7 +38,7 @@ beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
     // יצירת פוסט
     const postRes = yield (0, supertest_1.default)(app)
         .post("/posts")
-        .set("Authorization", `Bearer ${token}`)
+        .set("Authorization", `JWT ${token}`)
         .send({
         title: "Post for comments",
         content: "Post content",
@@ -64,7 +64,7 @@ describe("Comments Tests", () => {
     test("Test Create Comment", () => __awaiter(void 0, void 0, void 0, function* () {
         const response = yield (0, supertest_1.default)(app)
             .post("/comments")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `JWT ${token}`)
             .send(test_comments_json_1.default[0]);
         expect(response.statusCode).toBe(201);
         expect(response.body.comment).toBe(test_comments_json_1.default[0].comment);

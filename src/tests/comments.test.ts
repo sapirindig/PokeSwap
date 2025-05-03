@@ -21,16 +21,16 @@ beforeAll(async () => {
 
   const testUser = { email: "test@user.com", password: "testpassword", username: "testuser" };
 
-  // רישום והתחברות
+
   await request(app).post("/auth/register").send(testUser);
   const res = await request(app).post("/auth/login").send(testUser);
   token = res.body.accessToken;
   userId = res.body._id;
 
-  // יצירת פוסט
+ 
   const postRes = await request(app)
     .post("/posts")
-    .set("Authorization", `Bearer ${token}`)
+    .set("Authorization", `JWT ${token}`)
     .send({
       title: "Post for comments",
       content: "Post content",
@@ -39,7 +39,7 @@ beforeAll(async () => {
 
   postId = postRes.body._id;
 
-  // עדכון הבדיקות עם ערכים אמיתיים
+
   testComments[0].owner = userId;
   testComments[0].postId = postId;
 });
@@ -62,7 +62,7 @@ describe("Comments Tests", () => {
   test("Test Create Comment", async () => {
     const response = await request(app)
       .post("/comments")
-      .set("Authorization", `Bearer ${token}`)
+      .set("Authorization", `JWT ${token}`)
       .send(testComments[0]);
 
     expect(response.statusCode).toBe(201);
