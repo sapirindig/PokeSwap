@@ -3,6 +3,7 @@ const router = express.Router();
 import postsController from "../controllers/posts_controller";
 import { authMiddleware } from "../controllers/auth_controller";
 import uploadPostImage from "../middlewares/uploadPostImage";
+import verifyToken from "../middlewares/verifyToken";
 
 
 
@@ -99,7 +100,7 @@ router.get("/:id", postsController.getById.bind(postsController));
  * /posts:
  *   post:
  *     summary: Create a new post
- *     description: Create a new post
+ *     description: Create a new post with an image
  *     tags:
  *       - Posts
  *     security:
@@ -107,7 +108,7 @@ router.get("/:id", postsController.getById.bind(postsController));
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -117,6 +118,10 @@ router.get("/:id", postsController.getById.bind(postsController));
  *               content:
  *                 type: string
  *                 description: The content of the post
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file to upload
  *             required:
  *               - title
  *               - content
@@ -129,12 +134,13 @@ router.get("/:id", postsController.getById.bind(postsController));
  *               $ref: '#/components/schemas/Post'
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Server error
  */
-router.post("/",authMiddleware,uploadPostImage.single("image"),postsController.create.bind(postsController));
-
-
+router.post("/",verifyToken,uploadPostImage.single("image"),postsController.create.bind(postsController));
+  
 /**
  * @swagger
  * posts/{id}:

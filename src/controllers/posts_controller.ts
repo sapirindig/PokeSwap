@@ -9,8 +9,9 @@ class PostsController extends BaseController<IPost> {
 
     async create(req: Request, res: Response) {
         try {
-            const userId = req.body.userId || req.params.userId;
-    
+          
+          const userId = (req as any).user._id;
+
             const imagePath = req.file ? `postImages/${req.file.filename.replace(/\\/g, "/")}` : "postImages/image.jpg";
     
             const post = {
