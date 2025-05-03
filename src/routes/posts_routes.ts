@@ -143,7 +143,7 @@ router.post("/",verifyToken,uploadPostImage.single("image"),postsController.crea
   
 /**
  * @swagger
- * posts/{id}:
+ * /posts/{id}:
  *   delete:
  *     summary: Delete a post by ID
  *     description: Delete a single post by its ID
@@ -163,10 +163,13 @@ router.post("/",verifyToken,uploadPostImage.single("image"),postsController.crea
  *         description: Post deleted successfully
  *       404:
  *         description: Post not found
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Server error
  */
-router.delete("/:id", authMiddleware, postsController.deleteItem.bind(postsController));
+router.delete("/:id",verifyToken,postsController.deleteItem.bind(postsController));
+  
 
 /**
  * @swagger
@@ -193,6 +196,50 @@ router.delete("/:id", authMiddleware, postsController.deleteItem.bind(postsContr
  *         description: Server error
  */
 router.get("/user/me", verifyToken, postsController.getMyPosts.bind(postsController));
+
+/**
+ * @swagger
+ * /posts/{id}:
+ *   put:
+ *     summary: Update a post
+ *     description: Update the title, content, or image of a post
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the post to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Post updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Post not found or not owned by user
+ *       500:
+ *         description: Server error
+ */
+router.put("/:id",verifyToken,uploadPostImage.single("image"),postsController.updatePost.bind(postsController));
+  
 
 
 export default router;

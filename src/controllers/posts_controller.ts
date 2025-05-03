@@ -48,7 +48,55 @@ class PostsController extends BaseController<IPost> {
           res.status(500).json({ error: "Failed to get user's posts" });
         }
       }
+
+      async updatePost(req: Request, res: Response) {
+        try {
+          const postId = req.params.id;
+          const userId = (req as any).user._id;
+          const { title, content } = req.body;
       
+          const imagePath = req.file ? `postImages/${req.file.filename.replace(/\\/g, "/")}` : undefined;
+      
+          const updatedPost = await postModel.findOneAndUpdate(
+            { _id: postId, owner: userId },
+            {
+              ...(title && { title }),
+              ...(content && { content }),
+              ...(imagePath && { image: imagePath })
+            },
+            { new: true }
+          );
+      
+          if (!updatedPost) {
+            return res.status(404).json({ message: "Post not found or unauthorized" });
+          }
+      
+          res.status(200).json(updatedPost);
+        } catch (err) {
+          res.status(500).json({ error: "Failed to update post" });
+        }
+      }
+
+      async deleteItem(req: Request, res: Response): Promise<void> {
+        try {
+          const postId = req.params.id;
+          const userId = (req as any).user._id;
+      
+          const deletedPost = await postModel.findOneAndDelete({
+            _id: postId,
+            owner: userId,
+          });
+      
+          if (!deletedPost) {
+            res.status(404).json({ message: "Post not found or not owned by user" });
+            return;
+          }
+      
+          res.status(200).json({ message: "Post deleted successfully" });
+        } catch (err) {
+          res.status(500).json({ error: "Failed to delete post" });
+        }
+      }
 
 }
 
