@@ -19,7 +19,7 @@ const ProfilePage = () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts/user/me`, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `JWT ${token}`,
         }
       });
       const data = await res.json();

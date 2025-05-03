@@ -21,7 +21,7 @@ const CreatePostWindow = ({ onClose, onPostSuccess }: PostWindowProps) => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/me`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `JWT ${token}`,
           },
         });
 
@@ -70,7 +70,7 @@ const CreatePostWindow = ({ onClose, onPostSuccess }: PostWindowProps) => {
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts`, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `JWT ${token}`,
           },
           body: formData,
         });
