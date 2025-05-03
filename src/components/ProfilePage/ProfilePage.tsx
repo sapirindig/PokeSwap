@@ -15,9 +15,13 @@ const ProfilePage = () => {
   const [posts, setPosts] = useState<Post[]>([]);
 
   const fetchUserPosts = async () => {
-    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem("accessToken");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts/user/${userId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts/user/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       setPosts(data);
     } catch (err) {
