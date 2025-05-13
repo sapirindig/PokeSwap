@@ -2,6 +2,8 @@ import express from "express";
 const router = express.Router();
 import commentsController from "../controllers/comments_controller";
 import { authMiddleware } from "../controllers/auth_controller";
+import verifyToken from "../middlewares/verifyToken";
+
 
 /**
  * @swagger
@@ -128,7 +130,7 @@ router.get("/:id", commentsController.getById.bind(commentsController));
  *       500:
  *         description: Server error
  */
-router.post("/", authMiddleware, commentsController.create.bind(commentsController));
+router.post("/", verifyToken, commentsController.createComment.bind(commentsController));
 
 /**
  * @swagger
