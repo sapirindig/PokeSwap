@@ -60,3 +60,71 @@
     word-break: break-word;
   }
   
+  .comment-section {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+  
+  .comment-arrow-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .comment-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .comment-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .comment-input {
+    background-color: #f5f5f5;
+    border-radius: 12px;
+    padding: 12px 18px;
+    border: none;
+    font-size: 14px;
+    color: #333;
+    flex: 1;
+    outline: none;
+  }
+  
+  .comment-send-icon {
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+  }
+  
+  .comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 5px;
+  }
+  
+  .comment-item {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: 14px;
+    color: #333;
+    box-shadow: none;
+    direction: rtl;
+    text-align: right;
+  }
+  
+  
