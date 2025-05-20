@@ -88,4 +88,16 @@ describe("Comments Tests", () => {
     expect(response.body.postId).toBe(testComments[0].postId);
     expect(response.body.owner).toBe(testComments[0].owner);
   });
+
+  test("Delete comment", async () => {
+    const response = await request(app)
+      .delete("/comments/" + commentId)
+      .set("Authorization", `JWT ${token}`);
+  
+    expect(response.statusCode).toBe(200);
+  
+    const confirm = await request(app).get("/comments/" + commentId);
+    expect(confirm.statusCode).toBe(404);
+  });
+  
 });
