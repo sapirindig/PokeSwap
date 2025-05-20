@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import "../CreatePostWindow/CreatePostWindow.css";
-
+// EditPostWindow.tsx
+import { useState } from 'react';
+import "./EditPostWindow.css";
 
 interface EditPostWindowProps {
   post: {
@@ -63,11 +63,11 @@ const EditPostWindow = ({ post, onClose }: EditPostWindowProps) => {
   };
 
   return (
-    <div className="post-window">
+    <div className="edit-post-window">
       <img
         src="/icons/close.png"
         alt="close"
-        style={{ position: 'absolute', top: 10, right: 10, cursor: 'pointer', width: 24 }}
+        className="close-button"
         onClick={onClose}
       />
 
@@ -98,22 +98,9 @@ const EditPostWindow = ({ post, onClose }: EditPostWindowProps) => {
         onChange={(e) => setContent(e.target.value)}
       />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-        <button
-          className="post-button"
-          style={{ backgroundColor: 'green' }}
-          onClick={handleSave}
-        >
-          SAVE
-        </button>
-
-        <button
-          className="post-button"
-          style={{ backgroundColor: 'red' }}
-          onClick={handleDelete}
-        >
-          DELETE
-        </button>
+      <div className="button-row">
+        <button className="post-button green" onClick={handleSave}>SAVE</button>
+        <button className="post-button red" onClick={handleDelete}>DELETE</button>
       </div>
     </div>
   );
