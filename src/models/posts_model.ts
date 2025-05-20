@@ -4,7 +4,9 @@ export interface IPost {
   title: string;
   content: string;
   owner: string;
-  image?: string; 
+  image?: string;
+  likesCount?: number;
+  likedBy?: string[];
 }
 
 const postSchema = new mongoose.Schema<IPost>({
@@ -19,9 +21,18 @@ const postSchema = new mongoose.Schema<IPost>({
   },
   image: {
     type: String,
-    default: "/postImages/image.jpg", 
-
+    default: "/postImages/image.jpg",
   },
+  likesCount: {
+    type: Number,
+    default: 0,
+  },
+  likedBy: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
 });
 
 const postModel = mongoose.model<IPost>("Posts", postSchema);

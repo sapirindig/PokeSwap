@@ -36,6 +36,7 @@ afterAll((done) => {
 });
 
 let postId = "";
+
 describe("Posts Tests", () => {
   test("Posts test get all", async () => {
     const response = await request(app).get("/posts");
@@ -69,7 +70,10 @@ describe("Posts Tests", () => {
   });
 
   test("Test get post by id", async () => {
-    const response = await request(app).get("/posts/" + postId);
+    const response = await request(app)
+      .get("/posts/" + postId)
+      .set("Authorization", "JWT " + testUser.token);
+
     expect(response.statusCode).toBe(200);
     expect(response.body.title).toBe("Test Post");
     expect(response.body.content).toBe("Test Content");
@@ -92,7 +96,10 @@ describe("Posts Tests", () => {
       .set({ authorization: "JWT " + testUser.token });
     expect(response.statusCode).toBe(200);
 
-    const response2 = await request(app).get("/posts/" + postId);
+    const response2 = await request(app)
+      .get("/posts/" + postId)
+      .set("Authorization", "JWT " + testUser.token);
+
     expect(response2.statusCode).toBe(404);
   });
 

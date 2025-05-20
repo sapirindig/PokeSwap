@@ -67,36 +67,6 @@ router.get("/", postsController.getAll.bind(postsController));
 
 /**
  * @swagger
- * /posts/{id}:
- *   get:
- *     summary: Get a post by ID
- *     description: Retrieve a single post by its ID
- *     tags:
- *       - Posts
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The ID of the post
- *     responses:
- *       200:
- *         description: A single post
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Post'
- *       404:
- *         description: Post not found
- *       500:
- *         description: Server error
- */
-router.get("/:id", postsController.getById.bind(postsController));
-
-
-/**
- * @swagger
  * /posts:
  *   post:
  *     summary: Create a new post
@@ -239,7 +209,128 @@ router.get("/user/me", verifyToken, postsController.getMyPosts.bind(postsControl
  *         description: Server error
  */
 router.put("/:id",verifyToken,uploadPostImage.single("image"),postsController.updatePost.bind(postsController));
-  
+  /**
+ * @swagger
+ * /posts/{id}:
+ *   get:
+ *     summary: Get a post by ID
+ *     description: Retrieve a single post by its ID and check if the logged-in user liked it
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the post
+ *     responses:
+ *       200:
+ *         description: A single post including like status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 title:
+ *                   type: string
+ *                 content:
+ *                   type: string
+ *                 image:
+ *                   type: string
+ *                 owner:
+ *                   type: string
+ *                 likesCount:
+ *                   type: number
+ *                 likedBy:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 liked:
+ *                   type: boolean
+ *       404:
+ *         description: Post not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+  router.get("/:id", verifyToken, postsController.getPostById.bind(postsController));
+
+/**
+ * @swagger
+ * /posts/{id}/like:
+ *   post:
+ *     summary: Like a post
+ *     description: Add a like to the post by the logged-in user
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post to like
+ *     responses:
+ *       200:
+ *         description: Post liked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ *       400:
+ *         description: Already liked
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Server error
+ */
+router.post("/:id/like", verifyToken, postsController.likePost.bind(postsController));
+/**
+ * @swagger
+ * /posts/{id}/unlike:
+ *   delete:
+ *     summary: Unlike a post
+ *     description: Remove a like from the post by the logged-in user
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post to unlike
+ *     responses:
+ *       200:
+ *         description: Post unliked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ *       400:
+ *         description: Post was not liked
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Server error
+ */
+router.delete("/:id/unlike", verifyToken, postsController.unlikePost.bind(postsController));
+
+
 
 
 export default router;

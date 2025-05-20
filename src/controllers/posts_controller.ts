@@ -97,6 +97,76 @@ class PostsController extends BaseController<IPost> {
           res.status(500).json({ error: "Failed to delete post" });
         }
       }
+      
+      getPostById = async (req: Request, res: Response) => {
+        try {
+          const postId = req.params.id;
+          const userId = (req as any).user?._id?.toString();
+      
+          const post = await postModel.findById(postId);
+          if (!post) return res.status(404).json({ message: "Post not found" });
+      
+          let liked = false;
+          if (userId && post.likedBy?.map(id => id.toString()).includes(userId)) {
+            liked = true;
+          }
+      
+          res.status(200).json({ ...post.toObject(), liked });
+        } catch (err) {
+          res.status(500).json({ error: "Failed to get post" });
+        }
+      }      
+
+      async likePost(req: Request, res: Response) {
+        try {
+          const postId = req.params.id;
+          const userId = (req as any).user._id.toString();
+      
+          const post = await postModel.findById(postId);
+          if (!post) return res.status(404).json({ message: "Post not found" });
+      
+          const likedByStrings = post.likedBy?.map(id => id.toString()) || [];
+      
+          if (likedByStrings.includes(userId)) {
+            return res.status(400).json({ message: "You already liked this post" });
+          }
+      
+          post.likedBy?.push(userId);
+          post.likesCount = (post.likesCount || 0) + 1;
+          await post.save();
+      
+          res.status(200).json(post);
+        } catch (err) {
+          console.error("Like error:", err);
+          res.status(500).json({ error: "Failed to like post" });
+        }
+      }
+      
+      async unlikePost(req: Request, res: Response) {
+        try {
+          const postId = req.params.id;
+          const userId = (req as any).user._id.toString();
+      
+          const post = await postModel.findById(postId);
+          if (!post) return res.status(404).json({ message: "Post not found" });
+      
+          const likedByStrings = post.likedBy?.map(id => id.toString()) || [];
+      
+          if (!likedByStrings.includes(userId)) {
+            return res.status(400).json({ message: "You have not liked this post" });
+          }
+      
+          post.likedBy = post.likedBy?.filter(id => id.toString() !== userId);
+          post.likesCount = Math.max((post.likesCount || 1) - 1, 0);
+          await post.save();
+      
+          res.status(200).json(post);
+        } catch (err) {
+          console.error("Unlike error:", err);
+          res.status(500).json({ error: "Failed to unlike post" });
+        }
+      }
+      
 
 }
 
