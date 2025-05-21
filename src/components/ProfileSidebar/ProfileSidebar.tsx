@@ -7,8 +7,8 @@ const ProfileSidebar = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null); 
-  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -99,6 +99,13 @@ const ProfileSidebar = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    window.location.href = '/login';
+  };
+
   return (
     <div className="profile-sidebar">
       <div className="edit-icon" onClick={() => setEditMode(!editMode)}>
@@ -151,6 +158,12 @@ const ProfileSidebar = () => {
             <div className="profile-field">{profile?.email || 'email@example.com'}</div>
           </>
         )}
+      </div>
+
+      <div className="logout-container">
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </div>
   );
