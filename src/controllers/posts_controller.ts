@@ -51,19 +51,24 @@ class PostsController extends BaseController<IPost> {
 
       async updatePost(req: Request, res: Response) {
         try {
+          console.log("BODY:", req.body);
           const postId = req.params.id;
           const userId = (req as any).user._id;
-          const { title, content } = req.body;
       
-          const imagePath = req.file ? `postImages/${req.file.filename.replace(/\\/g, "/")}` : undefined;
+          const title = req.body.title || "";
+          const content = req.body.content || "";
+      
+          const updatedFields: any = {};
+          if (title) updatedFields.title = title;
+          if (content) updatedFields.content = content;
+      
+          if (req.file) {
+            updatedFields.image = `postImages/${req.file.filename.replace(/\\/g, "/")}`;
+          }
       
           const updatedPost = await postModel.findOneAndUpdate(
             { _id: postId, owner: userId },
-            {
-              ...(title && { title }),
-              ...(content && { content }),
-              ...(imagePath && { image: imagePath })
-            },
+            updatedFields,
             { new: true }
           );
       
@@ -76,6 +81,7 @@ class PostsController extends BaseController<IPost> {
           res.status(500).json({ error: "Failed to update post" });
         }
       }
+      
 
       async deleteItem(req: Request, res: Response): Promise<void> {
         try {
@@ -120,8 +126,13 @@ class PostsController extends BaseController<IPost> {
       async likePost(req: Request, res: Response) {
         try {
           const postId = req.params.id;
-          const userId = (req as any).user._id.toString();
+          const user = (req as any).user;
       
+          if (!postId || !user || !user._id) {
+            return res.status(400).json({ message: "Missing postId or user info" });
+          }
+      
+          const userId = user._id.toString();
           const post = await postModel.findById(postId);
           if (!post) return res.status(404).json({ message: "Post not found" });
       
@@ -140,15 +151,23 @@ class PostsController extends BaseController<IPost> {
           console.error("Like error:", err);
           res.status(500).json({ error: "Failed to like post" });
         }
-      }
+      }      
       
       async unlikePost(req: Request, res: Response) {
         try {
           const postId = req.params.id;
-          const userId = (req as any).user._id.toString();
+          const user = (req as any).user;
+      
+          if (!user || !user._id || !postId) {
+            return res.status(400).json({ message: "Missing user or post ID" });
+          }
+      
+          const userId = user._id.toString();
       
           const post = await postModel.findById(postId);
-          if (!post) return res.status(404).json({ message: "Post not found" });
+          if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+          }
       
           const likedByStrings = post.likedBy?.map(id => id.toString()) || [];
       
@@ -165,9 +184,8 @@ class PostsController extends BaseController<IPost> {
           console.error("Unlike error:", err);
           res.status(500).json({ error: "Failed to unlike post" });
         }
-      }
+      }      
       
-
 }
 
 export default new PostsController();

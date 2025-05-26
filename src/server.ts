@@ -27,7 +27,6 @@ app.use('/uploads', express.static('uploads'));
 app.use('/postImages', express.static(path.join(__dirname, '..', 'postImages')));
 
 
-
 const options = {
   definition: {
   openapi: "3.0.0",
