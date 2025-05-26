@@ -15,31 +15,27 @@ const CreatePostWindow = ({ onClose, onPostSuccess }: PostWindowProps) => {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    const userId = localStorage.getItem("userId");
-
-    const fetchUser = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/me`, {
-          headers: {
-            Authorization: `JWT ${token}`,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch user");
+  
+    if (token) {
+      const fetchUser = async () => {
+        try {
+          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+          });
+  
+          if (!res.ok) throw new Error("Failed to fetch user");
+          const data = await res.json();
+          setUser(data);
+        } catch (err) {
+          console.error("User fetch error:", err);
         }
-
-        const data = await res.json();
-        setUser(data);
-      } catch (err) {
-        console.error("User fetch error:", err);
-      }
-    };
-
-    if (token && userId) {
+      };
+  
       fetchUser();
     }
-  }, []);
+  }, []);  
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,7 +66,7 @@ const CreatePostWindow = ({ onClose, onPostSuccess }: PostWindowProps) => {
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts`, {
           method: "POST",
           headers: {
-            Authorization: `JWT ${token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: formData,
         });

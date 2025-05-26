@@ -1,4 +1,4 @@
-// EditPostWindow.tsx
+
 import { useState } from 'react';
 import "./EditPostWindow.css";
 
@@ -38,7 +38,7 @@ const EditPostWindow = ({ post, onClose }: EditPostWindowProps) => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts/${post._id}`, {
       method: 'PUT',
       headers: {
-        Authorization: `JWT ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: formData,
     });
@@ -54,7 +54,7 @@ const EditPostWindow = ({ post, onClose }: EditPostWindowProps) => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts/${post._id}`, {
       method: 'DELETE',
       headers: {
-        Authorization: `JWT ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 

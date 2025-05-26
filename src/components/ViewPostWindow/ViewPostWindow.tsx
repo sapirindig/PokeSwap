@@ -12,6 +12,7 @@ interface ViewPostWindowProps {
     likedBy?: string[];
   };
   onClose: () => void;
+  onLikeChange?: () => void;
 }
 
 interface Comment {
@@ -21,40 +22,33 @@ interface Comment {
   owner: string;
 }
 
-const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
+const ViewPostWindow = ({ post, onClose, onLikeChange }: ViewPostWindowProps) => {
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
   const [showInput, setShowInput] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
   const [canLike, setCanLike] = useState(true);
-  const userId = localStorage.getItem("userId");
+
+  const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const fetchPostStatus = async () => {
-      if (!userId || !post._id) return;
+      if (!token || !post._id) return;
       try {
-        const token = localStorage.getItem("accessToken");
-
         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts/${post._id}`, {
-          headers: {
-            Authorization: `JWT ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         if (!res.ok) return;
-
         const updatedPost = await res.json();
-
-        setLiked(updatedPost.liked);
+        setLiked(updatedPost.liked); 
         setLikesCount(updatedPost.likesCount);
       } catch (err) {
         console.error("Error fetching post like status", err);
       }
     };
-
     fetchPostStatus();
-  }, [post._id, userId]);
+  }, [post._id, token]);
 
   const fetchComments = async () => {
     try {
@@ -71,15 +65,14 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
   }, [post._id]);
 
   const handleCommentSubmit = async () => {
-    const token = localStorage.getItem("accessToken");
-    if (!newComment.trim() || !token || !userId) return;
+    if (!newComment.trim() || !token) return;
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `JWT ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ comment: newComment, postId: post._id }),
       });
@@ -88,7 +81,7 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
         setNewComment("");
         fetchComments();
       } else {
-        console.error("Failed to post comment");
+        console.error("Failed to post comment. Status:", res.status);
       }
     } catch (err) {
       console.error("Error submitting comment", err);
@@ -96,16 +89,10 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
   };
 
   const handleLikeToggle = async () => {
-    const token = localStorage.getItem("accessToken");
-    if (!token || !userId || !post._id || !canLike) return;
+    if (!token || !post._id || !canLike) return;
 
     setCanLike(false);
-
-    const prevLiked = liked;
-    const prevCount = likesCount;
-
-    setLiked(!liked);
-    setLikesCount((count) => count + (liked ? -1 : 1));
+    console.log("Trying to", liked ? "unlike" : "like", "post:", post._id);
 
     try {
       const endpoint = `${import.meta.env.VITE_API_BASE_URL}/posts/${post._id}/${liked ? "unlike" : "like"}`;
@@ -115,18 +102,30 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `JWT ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!res.ok) {
-        setLiked(prevLiked);
-        setLikesCount(prevCount);
         console.error("Like/unlike failed", res.status);
+        return;
       }
-    } catch {
-      setLiked(prevLiked);
-      setLikesCount(prevCount);
+
+      const updatedRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/posts/${post._id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!updatedRes.ok) return;
+      const updatedPost = await updatedRes.json();
+
+      setLiked(updatedPost.liked);
+      setLikesCount(updatedPost.likesCount);
+
+      if (onLikeChange) onLikeChange();
+    } catch (err) {
+      console.error("Like toggle error:", err);
     } finally {
       setTimeout(() => setCanLike(true), 300);
     }
@@ -140,7 +139,6 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
         onClick={onClose}
         className="close-button"
       />
-
       <div className="view-post-content">
         <div className="image-wrapper">
           <img
@@ -149,7 +147,6 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
             className="preview-image"
           />
         </div>
-
         <div className="post-details">
           <div className="like-section">
             <img
@@ -160,10 +157,8 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
             />
             <span className="likes-count">{likesCount}</span>
           </div>
-
           <div className="post-input">{post.title}</div>
           <div className="post-textarea">{post.content}</div>
-
           <div className="comment-section">
             <div
               className="comment-header"
@@ -176,7 +171,6 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
               />
               <span className="comment-title">Create Offer</span>
             </div>
-
             {showInput && (
               <div className="comment-input-row">
                 <input
@@ -186,15 +180,18 @@ const ViewPostWindow = ({ post, onClose }: ViewPostWindowProps) => {
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Write your comment..."
                 />
-                <img
-                  src="/icons/message.png"
-                  alt="submit"
-                  className="comment-send-icon"
+                <div
+                  className="comment-send-button"
                   onClick={handleCommentSubmit}
-                />
+                >
+                  <img
+                    src="/icons/message.png"
+                    alt="submit"
+                    className="comment-send-icon"
+                  />
+                </div>
               </div>
             )}
-
             <div className="comments-list">
               {comments.map((cmt) => (
                 <div key={cmt._id} className="comment-item">

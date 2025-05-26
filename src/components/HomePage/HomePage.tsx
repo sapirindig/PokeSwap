@@ -105,10 +105,13 @@ const HomePage = () => {
           ))}
         </div>
       )}
-
-      {selectedPost && (
-        <ViewPostWindow post={selectedPost} onClose={handleCloseView} />
-      )}
+{selectedPost && (
+  <ViewPostWindow
+    post={selectedPost}
+    onClose={handleCloseView}
+    onLikeChange={fetchPosts} 
+  />
+)}
     </div>
   );
 };
